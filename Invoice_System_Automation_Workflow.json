@@ -1,0 +1,117 @@
+{
+  "name": "Invoice System Automation Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "invoice-process",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -360,
+        -40
+      ],
+      "id": "52215acc-e0d1-4172-95c9-cd2a62c13cf3",
+      "name": "Webhook",
+      "webhookId": "9751eaef-081d-4f9a-909b-5326f5ba30dc"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://python-api:8000/process-invoice",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "invoice_file",
+              "inputDataFieldName": "invoice_file"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "goods_file",
+              "inputDataFieldName": "goods_file"
+            },
+            {
+              "name": "min_score"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -140,
+        -40
+      ],
+      "id": "4d2c415f-5112-426c-8b9c-64336c569757",
+      "name": "HTTP Request (Call Python API)"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        80,
+        -40
+      ],
+      "id": "20d423c8-2cc8-4ef6-98af-25ee09e029fc",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request (Call Python API)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request (Call Python API)": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "72b17685-9526-4051-9e88-4d86da5c1a48",
+  "meta": {
+    "instanceId": "ea5bc9044595e0b954a7798790c8ed89af4c9e3c7541bb83aafd87b4647cf9ba"
+  },
+  "id": "o1NllIHSvuR5419a",
+  "tags": [
+    {
+      "name": "# python",
+      "id": "dxmFGPGxkX4qRmd8",
+      "createdAt": "2025-04-23T13:37:43.547Z",
+      "updatedAt": "2025-04-23T13:37:43.547Z"
+    }
+  ]
+}
