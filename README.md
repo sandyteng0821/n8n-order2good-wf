@@ -11,7 +11,7 @@ This project sets up a simple workflow automation using [n8n](https://n8n.io/) a
 
 ```mermaid
 graph TD;
-    A[Webhook Trigger (n8n)] --> B[HTTP Request to FastAPI];
+    A[Webhook Trigger on n8n] --> B[HTTP Request to FastAPI];
     B --> C[Python subprocess executes invoice_system.py];
     C --> D[JSON result returned to n8n];
     D --> E[Webhook Response];
