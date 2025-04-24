@@ -97,7 +97,7 @@ def extract_metadata_and_item_lines(text_lines):
             item_lines.append(line.strip())
     return order_date, customer_name, item_lines
 
-def summarize_to_json(text_lines, goods_df, tax=0, status="處理中", input_type="auto", min_score=None):
+def summarize_to_json(text_lines, goods_df, tax=0, status="completed", input_type="auto", min_score=None):
     if input_type == "auto":
         if all(re.search(r"\s", line) for line in text_lines):
             input_type = "text"
@@ -133,11 +133,18 @@ def summarize_to_json(text_lines, goods_df, tax=0, status="處理中", input_typ
         if match:
             quantity = int(match.group(1)) * int(match.group(2))
         else:
-            numbers = [int(num) for num in re.findall(r'\d+', raw_line)]
-            if len(numbers) == 2:
-                quantity, unit_price = numbers
-            elif len(numbers) == 1:
-                quantity = numbers[0]
+            # improved regex pattern to specifically capture quantity and unit price
+            match = re.search(r'(\d+)\s+(?:[^\d\s]+)\s+(\d+)(?:\s+\d+)?$', raw_line)
+            if match:
+                quantity = int(match.group(1))
+                unit_price = int(match.group(2))
+            else:
+                # simple number  extraction if pattern doesn't match
+                numbers = [int(num) for num in re.findall(r'\b\d+\b', raw_line)] # improved number extraction - get all numbers and take the last two for quantity and unit_price
+                if len(numbers) >= 2:
+                    quantity, unit_price = numbers[-2:] # take the last two numbers 
+                elif len(numbers) == 1:
+                    quantity = numbers[0]
 
         subtotal = quantity * unit_price
         total_amount += subtotal
@@ -163,6 +170,19 @@ def summarize_to_json(text_lines, goods_df, tax=0, status="處理中", input_typ
     }
     return result
 
+def update_total_amount(order_data): # a function to sum up total amount (recorded goods only)
+    total = 0
+    for item in order_data.get("items", []):
+        quantity = item.get("quantity", 0)
+        unit_price = item.get("unit_price", 0)
+        item["subtotal"] = quantity * unit_price
+        total += item["subtotal"]
+    
+    order_data["total_amount"] = total
+    print(total) # debug
+    return order_data
+
+
 def main():
     parser = argparse.ArgumentParser(description="Invoice agent - match items to product list")
     parser.add_argument("-g", "--goods", required=True, help="Path to goods CSV file")
@@ -177,9 +197,12 @@ def main():
     ext = os.path.splitext(args.input)[-1].lower()
     input_type = "text" if ext in [".txt", ".jpg", ".jpeg", ".png"] else "structured"
     json_summary = summarize_to_json(input_lines, goods_df, input_type=input_type, min_score=args.min_score)
+    updated_json = update_total_amount(json_summary)
+    #print(updated_json)
 
     with open(args.output, 'w', encoding='utf-8') as f:
         json.dump(json_summary, f, ensure_ascii=False, indent=2)
+        #json.dump(updated_json, f, ensure_ascii=False, indent=2)
     print(f"Done! Results saved to {args.output}")
 
 if __name__ == '__main__':
