@@ -1,5 +1,5 @@
 # n8n-order2good-wf
-An n8n workflow to automate order to good list comparison workflow
+An n8n workflow to automate order to goods list comparison workflow
 
 # 🧾 Invoice Processing Automation via n8n + FastAPI
 
@@ -96,7 +96,7 @@ CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
 
 ## 🚀 Workflow Usage
 
-Once containers are up and running, you can trigger the workflow using:
+Once containers are up and running, you can create the workflow via importing the workflow template ./Invoice_System_Automation_Workflow.json and trigger the workflow using:
 
 ```bash
 curl -X POST http://localhost:5678/webhook-test/invoice-process \
