@@ -151,12 +151,12 @@ def summarize_to_json(text_lines, goods_df, tax=0, status="completed", input_typ
 
         item = {
             "product_id": product_row['品號'],
-            "matched_name": matched_name,
-            "original_input": raw_line,
+            "matched_name": product_row['品名'], # the official product name from goods_df
+            "original_input": raw_line, # the actual input text (entire input) # Remark: only the product name is compared to the names within "goods_df"
             "quantity": quantity,
             "unit_price": unit_price,
             "subtotal": subtotal,
-            "match_score": round(score, 2)
+            "match_score": float(f"{score / 100:.2f}") # update score unit (e.g., 29 -> 0.29)
         }
         items.append(item)
 
@@ -186,7 +186,7 @@ def update_total_amount(order_data): # a function to sum up total amount (record
 def main():
     parser = argparse.ArgumentParser(description="Invoice agent - match items to product list")
     parser.add_argument("-g", "--goods", required=True, help="Path to goods CSV file")
-    parser.add_argument("-i", "--input", required=True, help="Path to input invoice file (pdf/image/csv/txt)")
+    parser.add_argument("-i", "--input", required=True, help="Path to input invoice file (pdf/image/txt)")
     parser.add_argument("-o", "--output", default="fuzzy_match_result.json", help="Output JSON file")
     parser.add_argument("--min_score", type=int, default=None, help="Minimum fuzzy match score to accept")
     args = parser.parse_args()
@@ -197,7 +197,7 @@ def main():
     ext = os.path.splitext(args.input)[-1].lower()
     input_type = "text" if ext in [".txt", ".jpg", ".jpeg", ".png"] else "structured"
     json_summary = summarize_to_json(input_lines, goods_df, input_type=input_type, min_score=args.min_score)
-    updated_json = update_total_amount(json_summary)
+    #updated_json = update_total_amount(json_summary)
     #print(updated_json)
 
     with open(args.output, 'w', encoding='utf-8') as f:
