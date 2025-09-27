@@ -1,11 +1,40 @@
 from fastapi import FastAPI, UploadFile, File, Form
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 import tempfile
 import subprocess
 import os
 import json
 
-app = FastAPI()
+app = FastAPI(title="Invoice Processing API", version="1.0.0")
+
+# @app.get("/")
+# async def root():
+#     return {
+#         "message": "Invoice Processing API is running!",
+#         "version": "1.0.0",
+#         "endpoints": {
+#             "docs": "/docs",
+#             "redoc": "/redoc",
+#             "process_invoice": "/process-invoice (POST)"
+#         }
+#     }
+@app.get("/")
+async def root():
+    html_content = """
+    <html>
+        <head>
+            <title>Invoice System - Upload</title>
+        </head>
+        <body>
+            Check <a href="/docs">the link</a> for more details. <br>
+        </body>
+    </html>
+    """
+    return HTMLResponse(html_content)
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "message": "Service is running"}
 
 @app.post("/process-invoice")
 async def process_invoice(
